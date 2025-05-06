@@ -9,6 +9,8 @@ int main()
         printf("Allocation failed.");
         return 0;
     }
+    free(mall);
+    printf("Enter 5 numbers = ");
     for (int i = 0; i < 5; i++)
     {
         scanf("%d",&mall[i]);
@@ -20,12 +22,13 @@ int main()
         printf("Allocation failed.");
         return 0;
     }
+    printf("Enter 4 numbers = ");
     for (int i = 0; i < 4; i++)
     {
         scanf("%d",&call[i]);
     }
 
-    int *mul = (int *)malloc(5 * sizeof(int));
+    int *mul = (int *)realloc(mul, 5 * sizeof(int));
     if (mul == NULL)
     {
         printf("Allocation failed.");
@@ -36,15 +39,9 @@ int main()
         mul[i] = mall[i] * call[i];
     }
 
-    mul = (int *)realloc(mul, 5 * sizeof(int));
-    if (mul == NULL)
-    {
-        printf("Allocation failed.");
-        return 0;
-    }
     for (int i = 0; i < 5; i++)
     {
-        printf("%d\n",mul[i]);
+        printf("Multiplication = %d\n",mul[i]);
     }
     free(mul);
 

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Quest: The Polyglot Chronicles - Prototype</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --primary: #6a4c93;
+            --secondary: #1982c4;
+            --accent: #8ac926;
+            --background: #111827;
+            --text: #ffffff;
+            --success: #06d6a0;
+            --error: #ef476f;
+            --panel-bg: #1f2937;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .language-selector {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .language-btn {
+            background-color: var(--panel-bg);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .language-btn.active {
+            background-color: var(--accent);
+        }
+        
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .game-panel {
+            flex: 1;
+            padding: 1rem;
+            background-color: var(--panel-bg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .game-world {
+            flex: 1;
+            background-color: #2d3748;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-objects {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .river {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(0deg, #1a365d 0%, #2c5282 100%);
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .shore {
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            background-color: #774d27;
+        }
+        
+        .north-shore {
+            top: calc(50% - 50px);
+        }
+        
+        .south-shore {
+            bottom: calc(50% - 50px);
+        }
+        
+        .character {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            background-color: var(--accent);
+            border-radius: 50% 50% 0 0;
+            left: 50px;
+            bottom: calc(50% + 30px);
+        }
+        
+        .character::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            background-color: #8540b0;
+            bottom: -5px;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .plank {
+            position: absolute;
+            height: 15px;
+            width: 60px;
+            background-color: #b45309;
+            top: 50%;
+            transform: translateY(-50%);
+            display: none;
+        }
+        
+        .villager {
+            position: absolute;
+            width: 30px;
+            height: 50px;
+            background-color: #e63946;
+            border-radius: 50% 50% 0 0;
+            right: 100px;
+            top: calc(50% - 80px);
+        }
+        
+        .dialog-box {
+            flex: 0 0 150px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            overflow-y: auto;
+            border: 1px solid var(--primary);
+        }
+        
+        .dialog-text {
+            margin-bottom: 10px;
+        }
+        
+        .dialog-options {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .dialog-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .code-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #1a202c;
+            overflow: hidden;
+        }
+        
+        .editor-container {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .code-controls {
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            background-color: var(--panel-bg);
+        }
+        
+        .run-btn {
+            background-color: var(--accent);
+            color: black;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .reset-btn {
+            background-color: var(--panel-bg);
+            color: white;
+            border: 1px solid var(--secondary);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .console {
+            height: 150px;
+            background-color: #000;
+            color: #50fa7b;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+        
+        .console .error {
+            color: var(--error);
+        }
+        
+        .console .success {
+            color: var(--success);
+        }
+        
+        .inventory {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .inventory-item {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        .typing {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 2s steps(40, end);
+        }
+        
+        /* Animation for console text */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        
+        /* Animation for success */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 0.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Code Quest: The Polyglot Chronicles</h1>
+        <div class="language-selector">
+            <button class="language-btn active" data-language="python">Python</button>
+            <button class="language-btn" data-language="javascript">JavaScript</button>
+            <button class="language-btn" data-language="java">Java</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="game-panel">
+            <div class="game-world">
+                <div class="game-objects">
+                    <div class="river"></div>
+                    <div class="shore north-shore"></div>
+                    <div class="shore south-shore"></div>
+                    <div class="character"></div>
+                    <div class="villager"></div>
+                    <div id="planks-container"></div>
+                </div>
+                <div class="inventory">
+                    <div class="inventory-item">🪵 x8</div>
+                </div>
+            </div>
+            <div class="dialog-box">
+                <div class="dialog-text">
+                    <p id="npc-dialog">Welcome to Syntaxia, Code Wizard! I'm so glad you're here. Our village is in trouble - the bridge across the river has collapsed, and we need your help to rebuild it!</p>
+                </div>
+                <div class="dialog-options">
+                    <button class="dialog-btn" id="continue-btn">Continue</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="code-panel">
+            <div class="editor-container" id="editor"></div>
+            <div class="code-controls">
+                <button class="run-btn" id="run-code">▶ Run Code</button>
+                <button class="reset-btn" id="reset-code">↺ Reset</button>
+            </div>
+            <div class="console" id="console-output"></div>
+        </div>
+    </div>
+
+    <script>
+        // Initial code templates for different languages
+        const codeTemplates = {
+            python: `# The Bridge Builder Challenge
+# Create a function called build_bridge that will place planks to cross the river
+# Parameters: length - the number of planks needed to complete the bridge
+# Use the place_plank(position) function to place each plank
+
+def build_bridge(length):
+    # Your code here
+    
+    return "Bridge complete!"
+
+# Call your function to build the bridge with 8 planks
+build_bridge(8)`,
+            javascript: `// The Bridge Builder Challenge
+// Create a function called buildBridge that will place planks to cross the river
+// Parameters: length - the number of planks needed to complete the bridge
+// Use the placePlank(position) function to place each plank
+
+function buildBridge(length) {
+    // Your code here
+    
+    return "Bridge complete!";
+}
+
+// Call your function to build the bridge with 8 planks
+buildBridge(8);`,
+            java: `// The Bridge Builder Challenge
+// Create a function called buildBridge that will place planks to cross the river
+// Parameters: length - the number of planks needed to complete the bridge
+// Use the placePlank(position) function to place each plank
+
+public String buildBridge(int length) {
+    // Your code here
+    
+    return "Bridge complete!";
+}
+
+// Call your method to build the bridge with 8 planks
+buildBridge(8);`
+        };
+
+        // Dialog sequences
+        const dialogSequence = [
+            "Welcome to Syntaxia, Code Wizard! I'm so glad you're here. Our village is in trouble - the bridge across the river has collapsed, and we need your help to rebuild it!",
+            "We need to place 8 planks across the river to create a safe passage. I hear you're skilled with the magic of code...",
+            "Could you write a function that places the planks in the correct positions? We need a systematic approach to ensure the bridge is stable.",
+            "Use the build_bridge function with a parameter for the length. Then use a loop to place each plank at the right position with the place_plank function.",
+            "I'll wait here while you work your magic. Just run your code when you're ready!"
+        ];
+
+        let currentDialogIndex = 0;
+        let currentLanguage = 'python';
+        let editor;
+        let bridgeComplete = false;
+
+        // Initialize Monaco Editor after the page loads
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('editor'), {
+                value: codeTemplates[currentLanguage],
+                language: currentLanguage,
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 14
+            });
+        });
+
+        // Dialog button functionality
+        document.getElementById('continue-btn').addEventListener('click', () => {
+            currentDialogIndex++;
+            if (currentDialogIndex < dialogSequence.length) {
+                const dialog = document.getElementById('npc-dialog');
+                dialog.textContent = dialogSequence[currentDialogIndex];
+                dialog.classList.remove('typing');
+                void dialog.offsetWidth; // Trigger reflow to restart animation
+                dialog.classList.add('typing');
+            } else {
+                document.getElementById('continue-btn').style.display = 'none';
+            }
+        });
+
+        // Language selector functionality
+        document.querySelectorAll('.language-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const language = button.getAttribute('data-language');
+                
+                // Update active button
+                document.querySelectorAll('.language-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+                
+                // Update editor language and content
+                currentLanguage = language;
+                if (editor) {
+                    monaco.editor.setModelLanguage(editor.getModel(), language);
+                    editor.setValue(codeTemplates[language]);
+                }
+                
+                // Reset bridge state when switching languages
+                resetBridgeState();
+                bridgeComplete = false;
+            });
+        });
+
+        // Reset code functionality
+        document.getElementById('reset-code').addEventListener('click', () => {
+            if (editor) {
+                editor.setValue(codeTemplates[currentLanguage]);
+            }
+            resetBridgeState();
+            bridgeComplete = false;
+        });
+
+        // Run code functionality
+        document.getElementById('run-code').addEventListener('click', () => {
+            const code = editor.getValue();
+            const consoleOutput = document.getElementById('console-output');
+            
+            // Clear previous output
+            consoleOutput.innerHTML = '';
+            
+            // Reset bridge state
+            resetBridgeState();
+            
+            try {
+                // Add to console
+                addToConsole('Running code...', 'normal');
+                
+                // Parse and execute code based on language
+                if (currentLanguage === 'python') {
+                    executePythonLikeCode(code);
+                } else if (currentLanguage === 'javascript') {
+                    executeJavaScriptLikeCode(code);
+                } else if (currentLanguage === 'java') {
+                    executeJavaLikeCode(code);
+                }
+            } catch (error) {
+                addToConsole('Error: ' + error.message, 'error');
+            }
+        });
+
+        function placePlank(position) {
+            return new Promise(resolve => {
+                const plankWidth = 60; // Width of each plank
+                const startX = 90; // Starting X position
+                const spacing = 65; // Spacing between planks
+                
+                const plank = document.createElement('div');
+                plank.className = 'plank';
+                plank.style.left = `${startX + (position * spacing)}px`;
+                plank.style.display = 'block';
+                
+                document.getElementById('planks-container').appendChild(plank);
+                
+                // Add a small delay to visualize sequential placement
+                setTimeout(() => {
+                    resolve(`Placed plank at position ${position}`);
+                }, 300);
+            });
+        }
+
+        async function executePythonLikeCode(code) {
+            // This is a simplified parser - not a real Python interpreter
+            try {
+                // Check if the code contains a loop
+                const hasLoop = code.includes('for') || code.includes('while');
+                if (!hasLoop) {
+                    addToConsole('Hint: Your solution should use a loop to place the planks.', 'normal');
+                    return;
+                }
+                
+                // Check if build_bridge function is defined
+                if (!code.includes('def build_bridge')) {
+                    addToConsole('Error: The build_bridge function is not defined.', 'error');
+                    return;
+                }
+                
+                // Simulate execution with our own place_plank function
+                for (let i = 0; i < 8; i++) {
+                    const message = await placePlank(i);
+                    addToConsole(message, 'normal');
+                }
+                
+                // Mark bridge as complete
+                addToConsole('Bridge complete!', 'success');
+                bridgeComplete = true;
+                celebrateBridgeCompletion();
+                
+            } catch (error) {
+                addToConsole('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function executeJavaScriptLikeCode(code) {
+            // This is a simplified parser - not a real JavaScript evaluator
+            try {
+                // Check if the code contains a loop
+                const hasLoop = code.includes('for') || code.includes('while');
+                if (!hasLoop) {
+                    addToConsole('Hint: Your solution should use a loop to place the planks.', 'normal');
+                    return;
+                }
+                
+                // Check if buildBridge function is defined
+                if (!code.includes('function buildBridge')) {
+                    addToConsole('Error: The buildBridge function is not defined.', 'error');
+                    return;
+                }
+                
+                // Simulate execution with our own placePlank function
+                for (let i = 0; i < 8; i++) {
+                    const message = await placePlank(i);
+                    addToConsole(message, 'normal');
+                }
+                
+                // Mark bridge as complete
+                addToConsole('Bridge complete!', 'success');
+                bridgeComplete = true;
+                celebrateBridgeCompletion();
+                
+            } catch (error) {
+                addToConsole('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function executeJavaLikeCode(code) {
+            // This is a simplified parser - not a real Java evaluator
+            try {
+                // Check if the code contains a loop
+                const hasLoop = code.includes('for') || code.includes('while');
+                if (!hasLoop) {
+                    addToConsole('Hint: Your solution should use a loop to place the planks.', 'normal');
+                    return;
+                }
+                
+                // Check if buildBridge method is defined
+                if (!code.includes('buildBridge')) {
+                    addToConsole('Error: The buildBridge method is not defined.', 'error');
+                    return;
+                }
+                
+                // Simulate execution with our own placePlank function
+                for (let i = 0; i < 8; i++) {
+                    const message = await placePlank(i);
+                    addToConsole(message, 'normal');
+                }
+                
+                // Mark bridge as complete
+                addToConsole('Bridge complete!', 'success');
+                bridgeComplete = true;
+                celebrateBridgeCompletion();
+                
+            } catch (error) {
+                addToConsole('Error: ' + error.message, 'error');
+            }
+        }
+
+        function addToConsole(message, type = 'normal') {
+            const consoleOutput = document.getElementById('console-output');
+            const line = document.createElement('div');
+            line.textContent = message;
+            line.classList.add(type);
+            line.classList.add('fade-in');
+            consoleOutput.appendChild(line);
+            
+            // Auto scroll to bottom
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        function resetBridgeState() {
+            const planksContainer = document.getElementById('planks-container');
+            planksContainer.innerHTML = '';
+        }
+
+        function celebrateBridgeCompletion() {
+            const npcDialog = document.getElementById('npc-dialog');
+            npcDialog.textContent = "Amazing! You did it! The bridge is complete! Your coding skills have saved our village. Now we can transport food and supplies again. You're a true Code Wizard!";
+            npcDialog.classList.remove('typing');
+            void npcDialog.offsetWidth; // Trigger reflow to restart animation
+            npcDialog.classList.add('typing');
+            
+            // Move character across the bridge
+            setTimeout(() => {
+                const character = document.querySelector('.character');
+                character.style.transition = 'left 3s ease-in-out';
+                character.style.left = 'calc(100% - 100px)';
+            }, 1000);
+        }
+
+        // Initialize the dialog with typing animation
+        document.addEventListener('DOMContentLoaded', () => {
+            const dialog = document.getElementById('npc-dialog');
+            dialog.classList.add('typing');
+        });
+    </script>
+</body>
+</html>
