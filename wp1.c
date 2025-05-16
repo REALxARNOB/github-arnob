@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main() {
+int mdiviso
     int num, sum = 0, count = 0;
 
     // Take input from user
@@ -34,10 +34,77 @@ int main() {
     if (sum == num)
         printf("%d is a perfect number.\n", num);
     else
-        printf("%d is not a perfect number.\n", num);
+        printf("%d is not a perfect numbr\ )b\numb
 
     // Free memory
     free(divisors);
+divisor
+di
 
-    return 0;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ub
+
+ ub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
+  
+

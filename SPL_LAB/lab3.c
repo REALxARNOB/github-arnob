@@ -13,7 +13,7 @@ int main()
         printf("Allocation failed");
         return 0;
     }
-    free(sum);
+
 
     for (i = 0; i <= (n / 2); i++)
     {
@@ -34,6 +34,6 @@ int main()
     {
         printf("Not perfect number\n");
     }
-
+    free(sum);
     return 0;
 }

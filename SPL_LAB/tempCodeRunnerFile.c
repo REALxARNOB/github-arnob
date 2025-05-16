@@ -1,13 +1,5 @@
-for (int i = 0; i < 5; i++)
+for (int i = 1; temp != NULL && i < position; i++)
     {
-        mul[i] = mall[i] * call[i];
+        prev = temp;
+        temp = temp->pointer;
     }
-
-    for (int i = 0; i < 5; i++)
-    {
-        printf("Multiplication = %d\n",mul[i]);
-    }
-    free(mul);
-
-    return 0;
-}
