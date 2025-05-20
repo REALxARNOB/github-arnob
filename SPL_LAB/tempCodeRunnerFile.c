@@ -1,5 +1,6 @@
-for (int i = 1; temp != NULL && i < position; i++)
-    {
-        prev = temp;
-        temp = temp->pointer;
-    }
+head = deleteLastNode(head);
+    printf("List after deleting last node =  ");
+    printList(head);
+
+    return 0;
+}
