@@ -1,1 +1,1 @@
-This is github codespaces
+This is Github codespaces
